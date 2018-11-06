@@ -115,7 +115,7 @@ generate_pythia_params() {
     echo "RG:Beam2 $target"
     echo "RG:Mom1  $electronP"
     echo "RG:Mom2  $targetP"
-    echo "PMAS(4,1)=1.27    # charm mass"
+#    echo "PMAS(4,1)=1.27    # charm mass"
 ###
 ### PROCESS
 ###
@@ -233,6 +233,10 @@ esac
     echo -e "CKIN(74)=$Ymax"  "\t ### max light-cone fraction, y (D = 0.99)"
     echo -e "CKIN(77)=$Wmin"  "\t ### min photon-hadron invariant mass, W (D = 2.)"
     echo -e "CKIN(78)=$Wmax"  "\t ### max photon-hadron invariant mass, W (D = -1.)"
+###
+### MASSES AND WIDTHS
+###
+    cat "$(dirname -- "$0")/pmas.dat"
 }
 
 main
