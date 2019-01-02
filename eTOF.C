@@ -31,7 +31,7 @@ int eTOF(Track *track, double *deltat, double *nsigma)
   double Lc   = L / c;
 
   /** perform PID **/
-  double mass[5] = {0.00051099891, 0.10565800, 0.13957000, 0.49367700, 0.93827200};
+  double mass[5] = {0.00051099891, 0.10565800, 0.139570, 0.493600, 0.938270};
   for (Int_t ipart = 0; ipart < 5; ++ipart) {
     double mass2 = mass[ipart] * mass[ipart];
     double texp = Lc / p * TMath::Sqrt(mass2 + p2);

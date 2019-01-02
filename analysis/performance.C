@@ -18,6 +18,7 @@ void performance(const char *inputFile = "delphes.root")
   Int_t pbins = 200;
   double pmin = -2., pmax = 2.; // log10(GeV/c)
   
+  TH1 *hNhits[2];
   TH2 *hBetaP[2], *hDeltaT[2][5], *hNsigma[2][5], *hAll[5], *hAcceptance[2][5];
   TH2 *hCandidate[2][5], *hWrong[2][5];
   const char *tofname[2] = {"barrel", "forward"};
@@ -30,6 +31,8 @@ void performance(const char *inputFile = "delphes.root")
 
   for (Int_t iTOF = 0; iTOF < 2; ++iTOF) {
     
+    hNhits[iTOF] = new TH1F(Form("hNhits_%s", tofname[iTOF]), "", 100, 0., 100.);
+
     hBetaP[iTOF] = new TH2F(Form("hBetaP_%s", tofname[iTOF]), ";#it{p} (GeV/#it{c});v/#it{c}", pbins, pmin, pmax, 1000, 0.2, 1.2);
     
     for (Int_t ipart = 0; ipart < 5; ++ipart) {
@@ -57,6 +60,7 @@ void performance(const char *inputFile = "delphes.root")
     if (numberOfTracks <= 0) continue;
     
     // loop over tracks
+    int nhits[2] = {0, 0};
     for (Int_t itrack = 0; itrack < numberOfTracks; ++itrack) {
       Track *track = (Track *)branchTrack->At(itrack);
       GenParticle *particle = (GenParticle *) track->Particle.GetObject();
@@ -82,6 +86,7 @@ void performance(const char *inputFile = "delphes.root")
       double deltat[5], nsigma[5];
       int etof = eTOF(track, deltat, nsigma);
       if (etof < 0) continue;
+      nhits[etof]++;
 
       /** get info **/
       double tof = track->TOuter * 1.e9; // [ns]
@@ -107,6 +112,10 @@ void performance(const char *inputFile = "delphes.root")
       }
       
     } // loop over tracks
+
+    hNhits[0]->Fill(nhits[0]);
+    hNhits[1]->Fill(nhits[1]);
+
   } // loop over events
   
   // Show resulting histograms
@@ -116,6 +125,7 @@ void performance(const char *inputFile = "delphes.root")
   }
   for (Int_t etof = 0; etof < 2; ++etof) {
     hBetaP[etof]->Write();
+    hNhits[etof]->Write();
     for (Int_t ipart = 0; ipart < 5; ++ipart) {
       hAcceptance[etof][ipart]->Write();
       hDeltaT[etof][ipart]->Write();

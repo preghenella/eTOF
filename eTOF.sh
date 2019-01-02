@@ -10,8 +10,8 @@ sseed=123456789
 
 ### detector variables
 bz=2.       # [T]
-radius=150. # [cm]
-length=300. # [cm]
+radius=100. # [cm]
+length=150. # [cm]
 sigmat=0.03 # [ns]
 tracker=EIC
 
@@ -264,15 +264,45 @@ run() {
     seed=$(($sseed + $1 * 2))
     runid=$(printf "%03d" $1)
     touch .running.$workdir.$runid
+    if [ $? -ne 0 ]; then
+	echo "[$runid] error while initialising the run"
+	rm -rf .running.$workdir.$runid
+	exit
+    fi
     rundir="$workdir/$runid"
     mkdir -p $rundir
+    if [ $? -ne 0 ]; then
+	echo "[$runid] error while creating run directory"
+	rm -rf .running.$workdir.$runid
+	exit
+    fi
     mkfifo $rundir/pythia.hepmc
+    if [ $? -ne 0 ]; then
+	echo "[$runid] error while creating FIFO"
+	rm -rf .running.$workdir.$runid
+	exit
+    fi
     generate_card $1 > $rundir/card.tcl
+    if [ $? -ne 0 ]; then
+	echo "[$runid] error while generating card"
+	rm -rf .running.$workdir.$runid
+	exit
+    fi
     cp $params $rundir/pythia.params
+    if [ $? -ne 0 ]; then
+	echo "[$runid] error copying params"
+	rm -rf .running.$workdir.$runid
+	exit
+    fi
     for ianalysis in $analysis; do
 	analysisName=$(basename -- "$ianalysis")
 	analysisName=${analysisName%.*}
 	generate_analysis > $rundir/$analysisName.C
+	if [ $? -ne 0 ]; then
+	    echo "[$runid] error while generating analysis"
+	    rm -rf .running.$workdir.$runid
+	    exit
+	fi
     done
     cd $rundir
     echo "[$runid] working directory: `pwd`" 
